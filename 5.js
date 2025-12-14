@@ -46,7 +46,7 @@ async function main() {
   gl.bindVertexArray(squareVAO);
 
   // Draw three points
-  gl.drawArrays(gl.POINTS, 0, n);
+  gl.drawArrays(gl.TRIANGLES, 0, n);
 
   // Clean
   gl.bindVertexArray(null);
