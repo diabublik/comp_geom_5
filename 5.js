@@ -28,8 +28,20 @@ async function main() {
      return;
    }
 
+  const width = gl.drawingBufferWidth;
+  const height = gl.drawingBufferHeight
+
+  // location uniform переменных из фрагментного шейдера
+  const program = gl.getParameter(gl.CURRENT_PROGRAM)
+  const u_Width = gl.getUniformLocation(program, 'u_Width');
+  const u_Height = gl.getUniformLocation(program, 'u_Height');
+
+  // Передаем размеры в шейдер
+  gl.uniform1f(u_Width, width);
+  gl.uniform1f(u_Height, height);
+
   // Write the positions of vertices to a vertex shader
-  const n = initVertexBuffers(gl);
+  const n = initQuad(gl);
   if (n < 0) {
     console.log('Failed to set the positions of the vertices');
     return;
@@ -46,32 +58,21 @@ async function main() {
   gl.bindVertexArray(squareVAO);
 
   // Draw three points
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 
   // Clean
   gl.bindVertexArray(null);
 }
 
-function initVertexBuffers(gl) {
-    const n = 3; 
+function initQuad(gl) {
+    const n = 4; 
     const FSIZE = Float32Array.BYTES_PER_ELEMENT;
     
-    const positions = new Float32Array([
-        0.0, 0.5,    // Первая точка: x, y
-        -0.5, -0.5,  // Вторая точка: x, y  
-        0.5, -0.5    // Третья точка: x, y
-    ]);
-
-    const colours = new Float32Array([
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 0.0, 1.0
-    ])
-
-    const sizes = new Float32Array([
-        10.0,  // Первая точка: size
-        20.0,  // Вторая точка: size
-        30.0   // Третья точка: size
+    const vertices = new Float32Array([
+        -1.0, -1.0,
+         1.0, -1.0,
+        -1.0,  1.0,
+         1.0,  1.0
     ]);
 
     // Create VAO
@@ -85,32 +86,14 @@ function initVertexBuffers(gl) {
         return -1;
     }
 
-    const positionsByteLength = positions.length * FSIZE
-    const coloursBiteLength = colours.length * FSIZE
-    const sizesByteLength = sizes.length * FSIZE
-    const totalByteLength = positionsByteLength + coloursBiteLength + sizesByteLength
-
-    // Bind and fill buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, totalByteLength, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
-    gl.bufferSubData(gl.ARRAY_BUFFER, positionsByteLength, colours)
-    gl.bufferSubData(gl.ARRAY_BUFFER, positionsByteLength + coloursBiteLength, sizes)
-
-    // Атрибут для позиции (2 компонента: x, y)
+    // Настраиваем атрибут
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
 
-    // Атрибут для цвета точки
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, positionsByteLength);
-    gl.enableVertexAttribArray(1);
-    
-    // Атрибут для размера точки
-    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 0, positionsByteLength + coloursBiteLength);
-    gl.enableVertexAttribArray(2);
-    
-    // Clean
+    // Отвязываем
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 

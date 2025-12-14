@@ -1,16 +1,14 @@
 #version 300 es
 precision mediump float;
 
-flat in vec3 flatColor; // из вершинного шейдера
-in vec3 smoothColor; // из вершинного шейдера
+uniform float u_Width;
+uniform float u_Height;
 
-out vec3 fragColor;
+out vec4 fragColor;
 
 void main() {
-    if (gl_FragCoord.x < 200.0){ // левая часть сплошная
-      fragColor = flatColor;
-    }
-    else { // правая градиентная
-      fragColor = smoothColor;
-    }
+    fragColor = vec4(gl_FragCoord.x / u_Width, 
+                     0.0, 
+                     gl_FragCoord.y / u_Height, 
+                     1.0);
 }
