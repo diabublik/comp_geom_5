@@ -39,16 +39,16 @@ async function main() {
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
     
     console.log("Рисуем первый треугольник (красный), потом второй (зеленый)");
     
     gl.bindVertexArray(squareVAO);
-    
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    
-    gl.drawArrays(gl.TRIANGLES, 3, 3);
-    
+    for (let i = 0; i < 50; i++){
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      
+      gl.drawArrays(gl.TRIANGLES, 3, 3);
+    }
     gl.bindVertexArray(null);
 }
 // Красный - Зеленый
@@ -67,19 +67,19 @@ function initTriangles(gl) {
          0.5, -0.5,  
          0.0,  0.5, 
         
-        -0.3, -0.3,  
-         0.7, -0.3, 
-         0.2,  0.7 
+        -0.5, -0.5,  
+         0.5, -0.5, 
+         0.0,  0.5 
     ]);
 
     const colors = new Float32Array([
-        1.0, 0.0, 0.0, 0.3, 
-        1.0, 0.0, 0.0, 0.3, 
-        1.0, 0.0, 0.0, 0.3, 
+        1.0, 0.5, 0.0, 0.6, 
+        1.0, 0.5, 0.0, 0.6, 
+        1.0, 0.5, 0.0, 0.6, 
         
-        0.0, 1.0, 0.0, 0.3, 
-        0.0, 1.0, 0.0, 0.3,
-        0.0, 1.0, 0.0, 0.3 
+        1.0, 1.0, 0.0, 0.3, 
+        1.0, 1.0, 0.0, 0.3,
+        1.0, 1.0, 0.0, 0.3 
     ]);
 
     const FSIZE = Float32Array.BYTES_PER_ELEMENT;
