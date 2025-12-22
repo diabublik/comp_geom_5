@@ -41,57 +41,75 @@ async function main() {
   gl.uniform1f(u_Height, height);
 
   // Write the positions of vertices to a vertex shader
-  const n = initQuad(gl);
+  const n = initPoints(gl);
   if (n < 0) {
     console.log('Failed to set the positions of the vertices');
     return;
   }
 
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0, 1);
-  gl.viewport(0, 0, canvas.width, canvas.height);
+  // Настройка WebGL
+    gl.clearColor(0, 0, 0, 1);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    
+    // Включаем прозрачность для плавных краев
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Bind the VAO
-  gl.bindVertexArray(squareVAO);
-
-  // Draw three points
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
-
-  // Clean
-  gl.bindVertexArray(null);
+    // Рисуем
+    gl.bindVertexArray(squareVAO);
+    gl.drawArrays(gl.POINTS, 0, n);
+    gl.bindVertexArray(null);
 }
 
-function initQuad(gl) {
-    const n = 4; 
-    const FSIZE = Float32Array.BYTES_PER_ELEMENT;
+function initPoints(gl) {
+    const n = 3; // 3 точки
     
-    const vertices = new Float32Array([
-        -1.0, -1.0,
-         1.0, -1.0,
-        -1.0,  1.0,
-         1.0,  1.0
+    // Данные: позиции, цвета, размеры
+    const positions = new Float32Array([
+        0.0, 0.5,    // Точка 1: вверху
+        -0.5, -0.5,  // Точка 2: слева внизу
+        0.5, -0.5    // Точка 3: справа внизу
     ]);
 
-    // Create VAO
+    const colors = new Float32Array([
+        1.0, 0.0, 0.0,  // Красный
+        0.0, 1.0, 0.0,  // Зеленый
+        0.0, 0.0, 1.0   // Синий
+    ]);
+
+    const sizes = new Float32Array([
+        50.0,  // Большая точка (50 пикселей)
+        30.0,  // Средняя
+        20.0   // Маленькая
+    ]);
+
+    const FSIZE = Float32Array.BYTES_PER_ELEMENT;
+
+    // Создаем VAO
     squareVAO = gl.createVertexArray();
     gl.bindVertexArray(squareVAO);
 
-    // Create buffer
-    const vertexBuffer = gl.createBuffer();
-    if (!vertexBuffer) {
-        console.log('Failed to create the buffer object');
-        return -1;
-    }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-    // Настраиваем атрибут
+    // Создаем буфер для позиций
+    const posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(0);
+
+    // Создаем буфер для цветов
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(1);
+
+    // Создаем буфер для размеров
+    const sizeBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, sizes, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(2);
 
     // Отвязываем
     gl.bindVertexArray(null);
