@@ -28,57 +28,58 @@ async function main() {
      return;
    }
 
-  const width = gl.drawingBufferWidth;
-  const height = gl.drawingBufferHeight
-
-  // location uniform переменных из фрагментного шейдера
-  const program = gl.getParameter(gl.CURRENT_PROGRAM)
-  const u_Width = gl.getUniformLocation(program, 'u_Width');
-  const u_Height = gl.getUniformLocation(program, 'u_Height');
-
-  // Передаем размеры в шейдер
-  gl.uniform1f(u_Width, width);
-  gl.uniform1f(u_Height, height);
-
-  // Write the positions of vertices to a vertex shader
-  const n = initPoints(gl);
-  if (n < 0) {
-    console.log('Failed to set the positions of the vertices');
-    return;
-  }
+   const n = initTriangles(gl);
+    if (n < 0) {
+        console.log('Failed to create triangles');
+        return;
+    }
 
     gl.clearColor(0, 0, 0, 1);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     gl.clear(gl.COLOR_BUFFER_BIT);
     
-    // Включаем прозрачность
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
+    
+    console.log("Рисуем первый треугольник (красный), потом второй (зеленый)");
+    
     gl.bindVertexArray(squareVAO);
-    gl.drawArrays(gl.POINTS, 0, n);
+    
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    
+    gl.drawArrays(gl.TRIANGLES, 3, 3);
+    
     gl.bindVertexArray(null);
 }
+// Красный - Зеленый
+// (1,0,0,0.3)*0.3 + (0,0,0,1)*0.7 = (0.3,0,0,1)
+// (0,1,0,0.3)*0.3 + (0.3,0,0,1)*0.7 = (0.21,0.3,0,1)
 
-function initPoints(gl) {
-    const n = 3;
+// Зеленый - Красный
+// (0,0.3,0,1)
+// (1,0,0,0.3)*0.3 + (0,0.3,0,1)*0.7 = (0.3,0.21,0,1)
+
+function initTriangles(gl) {
+    const n = 6;
     
     const positions = new Float32Array([
-        0.0, 0.5,    
-        -0.5, -0.5,  
-        0.5, -0.5   
+        -0.5, -0.5, 
+         0.5, -0.5,  
+         0.0,  0.5, 
+        
+        -0.3, -0.3,  
+         0.7, -0.3, 
+         0.2,  0.7 
     ]);
 
     const colors = new Float32Array([
-        1.0, 0.0, 0.0,  
-        0.0, 1.0, 0.0, 
-        0.0, 0.0, 1.0  
-    ]);
-
-    const sizes = new Float32Array([
-        50.0,  
-        30.0, 
-        20.0   
+        1.0, 0.0, 0.0, 0.3, 
+        1.0, 0.0, 0.0, 0.3, 
+        1.0, 0.0, 0.0, 0.3, 
+        
+        0.0, 1.0, 0.0, 0.3, 
+        0.0, 1.0, 0.0, 0.3,
+        0.0, 1.0, 0.0, 0.3 
     ]);
 
     const FSIZE = Float32Array.BYTES_PER_ELEMENT;
@@ -95,14 +96,8 @@ function initPoints(gl) {
     const colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(1);
-
-    const sizeBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, sizes, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(2);
 
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
